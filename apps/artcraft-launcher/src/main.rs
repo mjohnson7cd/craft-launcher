@@ -122,11 +122,17 @@ fn native_options(hidden: bool) -> eframe::NativeOptions {
 /// Adrenalin installer leaves the integrated GPU on the OEM driver) it crashes inside
 /// `amdvlk64.dll` before the first frame. `WGPU_BACKEND` still overrides the default, and then
 /// wgpu picks the adapter itself.
+///
+/// Shaders compile with FXC (`d3dcompiler_47.dll`, part of Windows). wgpu's default loads any
+/// `dxcompiler.dll` on the DLL search path, and an older one left there by an SDK or another app
+/// fails every compile without its `dxil.dll`, so the launcher never started (#2103).
+/// `WGPU_DX12_COMPILER` still overrides this.
 #[cfg(windows)]
 fn wgpu_options() -> eframe::WgpuConfiguration {
-    use eframe::wgpu::{Backends, PowerPreference};
+    use eframe::wgpu::{Backends, Dx12Compiler, PowerPreference};
     let mut config = eframe::WgpuConfiguration::default();
     if let eframe::egui_wgpu::WgpuSetup::CreateNew(setup) = &mut config.wgpu_setup {
+        setup.instance_descriptor.backend_options.dx12.shader_compiler = Dx12Compiler::Fxc.with_env();
         if let Some(backends) = Backends::from_env() {
             setup.instance_descriptor.backends = backends;
         } else {
