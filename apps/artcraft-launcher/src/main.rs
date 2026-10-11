@@ -150,7 +150,7 @@ fn wgpu_options() -> eframe::WgpuConfiguration {
 /// wgpu's own adapter order (by device type, then enumeration order), except that any Direct3D 12
 /// adapter, the WARP software one included, comes before GL. wgpu ranks WARP last, so on GPUs with
 /// no D3D12 driver (Intel HD 4000, Radeon TeraScale) it picked the GL one, whose legacy driver
-/// failed `Surface::configure` and wgpu panicked before the window opened (#2087).
+/// failed `Surface::configure` and wgpu panicked before the window opened.
 #[cfg(any(windows, test))]
 fn adapter_rank(backend: eframe::wgpu::Backend, device_type: eframe::wgpu::DeviceType, integrated: bool) -> (bool, u8) {
     use eframe::wgpu::{Backend, DeviceType};
@@ -792,7 +792,7 @@ mod tests {
     #[test]
     fn warp_beats_a_gl_gpu_but_not_a_d3d12_gpu() {
         use eframe::wgpu::{Backend, DeviceType};
-        // #2087: Intel HD 4000 + Radeon HD 7600M have no D3D12 driver; their GL one fails to configure.
+        // Intel HD 4000 + Radeon HD 7600M have no D3D12 driver; their GL one fails to configure.
         let warp = adapter_rank(Backend::Dx12, DeviceType::Cpu, false);
         assert!(warp < adapter_rank(Backend::Gl, DeviceType::IntegratedGpu, false));
         assert!(warp < adapter_rank(Backend::Gl, DeviceType::Other, false));
